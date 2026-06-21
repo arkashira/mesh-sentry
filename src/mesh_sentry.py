@@ -1,33 +1,40 @@
 import json
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict
 
 @dataclass
-class Service:
-    name: str
-    performance_metrics: Dict[str, float]
+class IstioCredentials:
+    username: str
+    password: str
 
-class MeshSentry:
-    def __init__(self):
-        self.services = {}
+@dataclass
+class MeshMateConnection:
+    istio_url: str
+    credentials: IstioCredentials
 
-    def add_service(self, service: Service):
-        self.services[service.name] = service
+def authenticate_with_istio(connection: MeshMateConnection) -> bool:
+    # Simulate authentication with Istio
+    return connection.credentials.username == "admin" and connection.credentials.password == "password"
 
-    def get_service_topology(self) -> Dict[str, List[str]]:
-        topology = {}
-        for service_name, service in self.services.items():
-            topology[service_name] = list(self.services.keys())
-        return topology
+def ingest_telemetry_data(connection: MeshMateConnection) -> Dict:
+    # Simulate ingesting telemetry data from Istio
+    if authenticate_with_istio(connection):
+        return {"traffic_flows": [], "performance_metrics": {}}
+    else:
+        raise Exception("Authentication failed")
 
-    def update_service_performance_metrics(self, service_name: str, metrics: Dict[str, float]):
-        if service_name in self.services:
-            self.services[service_name].performance_metrics = metrics
-        else:
-            raise ValueError("Service not found")
+def get_connection_status(connection: MeshMateConnection) -> str:
+    try:
+        ingest_telemetry_data(connection)
+        return "Connected"
+    except Exception as e:
+        return f"Connection failed: {str(e)}"
 
-    def get_service_performance_metrics(self, service_name: str) -> Dict[str, float]:
-        if service_name in self.services:
-            return self.services[service_name].performance_metrics
-        else:
-            raise ValueError("Service not found")
+def main():
+    istio_url = "https://istio.example.com"
+    credentials = IstioCredentials("admin", "password")
+    connection = MeshMateConnection(istio_url, credentials)
+    print(get_connection_status(connection))
+
+if __name__ == "__main__":
+    main()

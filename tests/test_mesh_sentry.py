@@ -1,40 +1,35 @@
-import pytest
-from mesh_sentry import MeshSentry, Service
+from mesh_sentry import authenticate_with_istio, ingest_telemetry_data, get_connection_status, MeshMateConnection, IstioCredentials
 
-def test_add_service():
-    mesh_sentry = MeshSentry()
-    service = Service("test-service", {"requests": 10.0, "response_time": 100.0})
-    mesh_sentry.add_service(service)
-    assert service.name in mesh_sentry.services
+def test_authenticate_with_istio_valid_credentials():
+    credentials = IstioCredentials("admin", "password")
+    connection = MeshMateConnection("https://istio.example.com", credentials)
+    assert authenticate_with_istio(connection) == True
 
-def test_get_service_topology():
-    mesh_sentry = MeshSentry()
-    service1 = Service("test-service1", {"requests": 10.0, "response_time": 100.0})
-    service2 = Service("test-service2", {"requests": 20.0, "response_time": 200.0})
-    mesh_sentry.add_service(service1)
-    mesh_sentry.add_service(service2)
-    topology = mesh_sentry.get_service_topology()
-    assert "test-service1" in topology
-    assert "test-service2" in topology
-    assert len(topology["test-service1"]) == 2
-    assert len(topology["test-service2"]) == 2
+def test_authenticate_with_istio_invalid_credentials():
+    credentials = IstioCredentials("wrong", "credentials")
+    connection = MeshMateConnection("https://istio.example.com", credentials)
+    assert authenticate_with_istio(connection) == False
 
-def test_update_service_performance_metrics():
-    mesh_sentry = MeshSentry()
-    service = Service("test-service", {"requests": 10.0, "response_time": 100.0})
-    mesh_sentry.add_service(service)
-    new_metrics = {"requests": 20.0, "response_time": 200.0}
-    mesh_sentry.update_service_performance_metrics("test-service", new_metrics)
-    assert mesh_sentry.get_service_performance_metrics("test-service") == new_metrics
+def test_ingest_telemetry_data_valid_credentials():
+    credentials = IstioCredentials("admin", "password")
+    connection = MeshMateConnection("https://istio.example.com", credentials)
+    assert ingest_telemetry_data(connection) == {"traffic_flows": [], "performance_metrics": {}}
 
-def test_get_service_performance_metrics():
-    mesh_sentry = MeshSentry()
-    service = Service("test-service", {"requests": 10.0, "response_time": 100.0})
-    mesh_sentry.add_service(service)
-    metrics = mesh_sentry.get_service_performance_metrics("test-service")
-    assert metrics == {"requests": 10.0, "response_time": 100.0}
+def test_ingest_telemetry_data_invalid_credentials():
+    credentials = IstioCredentials("wrong", "credentials")
+    connection = MeshMateConnection("https://istio.example.com", credentials)
+    try:
+        ingest_telemetry_data(connection)
+        assert False
+    except Exception as e:
+        assert str(e) == "Authentication failed"
 
-def test_get_service_performance_metrics_service_not_found():
-    mesh_sentry = MeshSentry()
-    with pytest.raises(ValueError):
-        mesh_sentry.get_service_performance_metrics("non-existent-service")
+def test_get_connection_status_valid_credentials():
+    credentials = IstioCredentials("admin", "password")
+    connection = MeshMateConnection("https://istio.example.com", credentials)
+    assert get_connection_status(connection) == "Connected"
+
+def test_get_connection_status_invalid_credentials():
+    credentials = IstioCredentials("wrong", "credentials")
+    connection = MeshMateConnection("https://istio.example.com", credentials)
+    assert get_connection_status(connection) == "Connection failed: Authentication failed"

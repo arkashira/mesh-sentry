@@ -1,11 +1,8 @@
 # Mesh Sentry
 
-A service mesh management system.
+Mesh Sentry is a Python project that connects to an Istio service mesh and ingests telemetry data.
 
 ## Usage
 
-1. Create a `MeshSentry` instance.
-2. Add services using the `add_service` method.
-3. Get the service topology using the `get_service_topology` method.
-4. Update service performance metrics using the `update_service_performance_metrics` method.
-5. Get service performance metrics using the `get_service_performance_metrics` method.
+1. Install the project using `poetry install`
+2. Run the project using `poetry run python src/mesh_sentry.py`
