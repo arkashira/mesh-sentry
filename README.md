@@ -1,8 +1,2 @@
 # Mesh Sentry
-
-Mesh Sentry is a Python project that connects to an Istio service mesh and ingests telemetry data.
-
-## Usage
-
-1. Install the project using `poetry install`
-2. Run the project using `poetry run python src/mesh_sentry.py`
+Mesh Sentry is a service mesh visualization tool. It provides an interactive dashboard to visualize the service mesh and identify issues.

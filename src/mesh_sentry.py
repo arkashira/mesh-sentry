@@ -1,40 +1,47 @@
 import json
 from dataclasses import dataclass
-from typing import Dict
+from typing import List, Dict
 
 @dataclass
-class IstioCredentials:
-    username: str
-    password: str
+class Service:
+    name: str
+    namespace: str
+    health: str
+    traffic: int
 
-@dataclass
-class MeshMateConnection:
-    istio_url: str
-    credentials: IstioCredentials
+class MeshSentry:
+    def __init__(self):
+        self.services = []
 
-def authenticate_with_istio(connection: MeshMateConnection) -> bool:
-    # Simulate authentication with Istio
-    return connection.credentials.username == "admin" and connection.credentials.password == "password"
+    def add_service(self, service: Service):
+        self.services.append(service)
 
-def ingest_telemetry_data(connection: MeshMateConnection) -> Dict:
-    # Simulate ingesting telemetry data from Istio
-    if authenticate_with_istio(connection):
-        return {"traffic_flows": [], "performance_metrics": {}}
-    else:
-        raise Exception("Authentication failed")
+    def filter_services(self, name: str = None, namespace: str = None) -> List[Service]:
+        filtered_services = self.services
+        if name:
+            filtered_services = [s for s in filtered_services if s.name == name]
+        if namespace:
+            filtered_services = [s for s in filtered_services if s.namespace == namespace]
+        return filtered_services
 
-def get_connection_status(connection: MeshMateConnection) -> str:
-    try:
-        ingest_telemetry_data(connection)
-        return "Connected"
-    except Exception as e:
-        return f"Connection failed: {str(e)}"
+    def get_service_health(self, name: str) -> str:
+        for service in self.services:
+            if service.name == name:
+                return service.health
+        return None
 
-def main():
-    istio_url = "https://istio.example.com"
-    credentials = IstioCredentials("admin", "password")
-    connection = MeshMateConnection(istio_url, credentials)
-    print(get_connection_status(connection))
+    def get_service_traffic(self, name: str) -> int:
+        for service in self.services:
+            if service.name == name:
+                return service.traffic
+        return None
 
-if __name__ == "__main__":
-    main()
+    def visualize_mesh(self) -> Dict:
+        mesh_data = {}
+        for service in self.services:
+            mesh_data[service.name] = {
+                'namespace': service.namespace,
+                'health': service.health,
+                'traffic': service.traffic
+            }
+        return mesh_data
