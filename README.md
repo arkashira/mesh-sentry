@@ -1,2 +1,7 @@
 # Mesh Sentry
-Mesh Sentry is a service mesh visualization tool. It provides an interactive dashboard to visualize the service mesh and identify issues.
+
+Mesh Sentry is a policy enforcement and alerting system for service meshes.
+
+## Usage
+
+1. Create a `config.json` file with your policies:
