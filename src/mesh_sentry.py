@@ -1,43 +1,58 @@
 import json
 from dataclasses import dataclass
-from typing import List
+from typing import Dict, List
+import time
+import random
 
 @dataclass
-class Policy:
+class Node:
     name: str
-    rules: List[str]
+    error_rate: float
+    latency: float
 
 @dataclass
-class Alert:
-    policy_name: str
-    message: str
+class Connection:
+    source: str
+    target: str
+    traffic: int
 
 class MeshSentry:
     def __init__(self):
-        self.policies = []
-        self.alerts = []
+        self.nodes: Dict[str, Node] = {}
+        self.connections: Dict[str, Connection] = {}
 
-    def add_policy(self, policy: Policy):
-        self.policies.append(policy)
+    def add_node(self, name: str, error_rate: float, latency: float):
+        self.nodes[name] = Node(name, error_rate, latency)
 
-    def add_alert(self, alert: Alert):
-        self.alerts.append(alert)
+    def add_connection(self, source: str, target: str, traffic: int):
+        self.connections[f"{source}-{target}"] = Connection(source, target, traffic)
 
-    def enforce_policies(self, service_communication: str) -> List[Alert]:
-        triggered_alerts = []
-        for policy in self.policies:
-            for rule in policy.rules:
-                if rule in service_communication:
-                    triggered_alerts.append(Alert(policy.name, f"Policy {policy.name} triggered"))
-        return triggered_alerts
+    def get_topology(self):
+        topology = {"nodes": [], "connections": []}
+        for node in self.nodes.values():
+            topology["nodes"].append({"name": node.name, "error_rate": node.error_rate, "latency": node.latency})
+        for connection in self.connections.values():
+            topology["connections"].append({"source": connection.source, "target": connection.target, "traffic": connection.traffic})
+        return topology
 
-    def get_alerts(self) -> List[Alert]:
-        return self.alerts
+    def update_traffic(self):
+        for connection in self.connections.values():
+            connection.traffic = random.randint(0, 100)
 
-def load_policies_from_config(config: str) -> List[Policy]:
-    policies = []
-    config_data = json.loads(config)
-    for policy_data in config_data["policies"]:
-        policy = Policy(policy_data["name"], policy_data["rules"])
-        policies.append(policy)
-    return policies
+    def get_traffic_flow(self):
+        traffic_flow = {}
+        for connection in self.connections.values():
+            traffic_flow[f"{connection.source}-{connection.target}"] = connection.traffic
+        return traffic_flow
+
+    def get_error_rates(self):
+        error_rates = {}
+        for node in self.nodes.values():
+            error_rates[node.name] = node.error_rate
+        return error_rates
+
+    def get_latency(self):
+        latency = {}
+        for node in self.nodes.values():
+            latency[node.name] = node.latency
+        return latency
